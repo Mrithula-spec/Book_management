@@ -1,0 +1,1 @@
+A full-stack Mini Book Management Application built using the MERN stack, enabling users to securely manage personal booklists. The application supports user authentication, CRUD operations on booklists and books, and persistent sessions using JWT.
