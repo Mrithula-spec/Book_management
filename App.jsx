@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
+import Home from "./pages/Home"
+import { Link } from "react-router-dom";
 import Dashboard from "./pages/Dashboard"
 import Booklists from "./pages/Booklists"
 import Books from "./pages/Books"
@@ -13,10 +15,24 @@ function App() {
       <Navbar />
 
       <Routes>
+        {/* DEFAULT → LOGIN */}
         <Route path="/" element={<Navigate to="/login" />} />
 
+        {/* PUBLIC ROUTES */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/" element={<Home />} />
+
+
+        {/* PROTECTED ROUTES */}
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/dashboard"
@@ -28,7 +44,15 @@ function App() {
         />
 
         <Route
-          path="/booklists"
+          path="/booklists/view"
+          element={
+            <ProtectedRoute>
+              <Booklists readOnly={true}/>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/booklists/create"
           element={
             <ProtectedRoute>
               <Booklists />
