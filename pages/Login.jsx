@@ -15,7 +15,7 @@ function Login() {
     try {
       const res = await api.post("/auth/login", { email, password })
       login(res.data)
-      navigate("/dashboard")
+      navigate("/home")
     } catch {
       alert("Invalid credentials")
     }
@@ -51,4 +51,3 @@ function Login() {
 }
 
 export default Login
-
