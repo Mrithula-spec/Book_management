@@ -5,14 +5,14 @@ import {
   getBooklists,
   deleteBooklist,
   addBook,
-  deleteBook
+  deleteBook,
+  updateBooklist
 } from "../controllers/booklistController.js"
-
 const router = express.Router()
-
 router.post("/", protect, createBooklist)
 router.get("/", protect, getBooklists)
 router.delete("/:id", protect, deleteBooklist)
+router.put("/:id", protect, updateBooklist)
 router.post("/:id/books", protect, addBook)
 router.delete("/:id/books/:bookId", protect, deleteBook)
 
