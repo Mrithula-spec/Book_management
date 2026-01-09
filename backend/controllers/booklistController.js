@@ -18,9 +18,30 @@ export const createBooklist = async (req, res) => {
 }
 
 export const getBooklists = async (req, res) => {
-  const lists = await Booklist.find({ user: req.user })
+   console.log("REQ.USER =", req.user, typeof req.user)
+  const lists = await Booklist.find({ user: req.user._id })
   res.json(lists)
 }
+
+// UPDATE booklist name
+export const updateBooklist = async (req, res) => {
+  try {
+    const updated = await Booklist.findOneAndUpdate(
+      { _id: req.params.id, user: req.user },
+      { name: req.body.name },
+      { new: true }
+    )
+
+    if (!updated) {
+      return res.status(404).json({ message: "Booklist not found" })
+    }
+
+    res.json(updated)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 
 export const deleteBooklist = async (req, res) => {
   await Booklist.findByIdAndDelete(req.params.id)
