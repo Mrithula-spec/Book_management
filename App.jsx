@@ -2,10 +2,11 @@ import { Routes, Route, Navigate } from "react-router-dom"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
 import Home from "./pages/Home"
-import { Link } from "react-router-dom";
+import AllBooks from "./pages/AllBooks.jsx"
 import Dashboard from "./pages/Dashboard"
-import Booklists from "./pages/Booklists"
+import Booklist from "./pages/Booklist.jsx"
 import Books from "./pages/Books"
+import BookDetails from "./pages/BookDetails"
 import Navbar from "./components/Navbar"
 import ProtectedRoute from "./components/ProtectedRoute.jsx"
 
@@ -42,29 +43,37 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
-          path="/booklists/view"
+          path="/booklist/view"
           element={
             <ProtectedRoute>
-              <Booklists readOnly={true}/>
+              <Booklist readOnly={true}/>
             </ProtectedRoute>
           }
         />
         <Route
-          path="/booklists/create"
+          path="/booklist/create"
           element={
             <ProtectedRoute>
-              <Booklists />
+              <Booklist />
             </ProtectedRoute>
           }
         />
+        <Route
+  path="/books"
+  element={
+    <ProtectedRoute>
+      <AllBooks />
+    </ProtectedRoute>
+  }
+/>
+
 
         <Route
-          path="/booklists/:id"
+          path="/books/:id"
           element={
             <ProtectedRoute>
-              <Books />
+              <BookDetails />
             </ProtectedRoute>
           }
         />
