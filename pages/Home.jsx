@@ -1,18 +1,22 @@
 import { useContext, useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link,useNavigate } from "react-router-dom"
 import { AuthContext } from "../context/AuthContext"
 import api from "../api/axios"
 function Home() {
+  const navigate = useNavigate()
   const [selectedCategory, setSelectedCategory] = useState("All")
   const { user } = useContext(AuthContext)
   const [books, setBooks] = useState([])
 
   useEffect(() => {
     if (!user) return;
+    console.log("USER FROM CONTEXT:", user)
+    console.log("TOKEN FROM CONTEXT:", user.token)
+
 
     const fetchBooks = async () => {
       try {
-        const res = await api.get("/books",)
+        const res = await api.get("/books",{headers:{Authorization:`Bearer ${user.token}`,}})
         setBooks(res.data);
 
         
@@ -28,7 +32,12 @@ function Home() {
     ? books
     : books.filter(
         (book) => book.genre=== selectedCategory
+        
       )
+      const categories = [
+  "All",
+  ...new Set(books.map((book) => book.genre)),
+]
   return (
     <div className="bg-gray-50 text-gray-800">
       {/* HERO SECTION */}
@@ -57,15 +66,8 @@ function Home() {
       <section className="max-w-7xl mx-auto px-6 py-16">
         <h2 className="text-3xl font-bold mb-8 text-center">Browse Categories</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6">
-          {[
-  "All",
-  "Fiction",
-  "Non-Fiction",
-  "Fantasy",
-  "Technology",
-  "Self-Help",
-  "Biography",
-].map((cat) => (
+          {
+categories.map((cat) => (
   <div
     key={cat}
     onClick={() => setSelectedCategory(cat)}
@@ -89,7 +91,7 @@ function Home() {
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold">Featured Books</h2>
             <Link
-  to={user ? "/dashboard" : "/login"}
+  to={user ? "/books" : "/login"}
   className="text-indigo-600 font-medium hover:underline"
 >
   View All
@@ -102,9 +104,10 @@ function Home() {
       <div
         key={book._id}
         className="bg-gray-50 border rounded-xl p-4 hover:shadow-md transition"
+        onClick={() => navigate(`/books/${book._id}`)}
       >
         <img
-          src={book.thumbnail || "https://via.placeholder.com/150"}
+          src={`http://localhost:5000${book.thumbnail}`}
           alt={book.bookName}
           className="h-40 w-full object-cover rounded mb-3"
         />
