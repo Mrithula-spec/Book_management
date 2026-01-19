@@ -14,7 +14,7 @@ function Register() {
     e.preventDefault()
 
     try {
-      await api.post("api/auth/register", form)
+      await api.post("auth/register", form)
       navigate("/login")
     } catch (err) {
       alert(err.response?.data?.message || "Registration failed")
