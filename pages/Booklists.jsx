@@ -1,22 +1,26 @@
 import { useEffect, useState } from "react"
 import api from "../api/axios"
+import { useLocation } from "react-router-dom"
 import { Link } from "react-router-dom"
 
-function Booklists({readOnly=false}) {
+function Booklist({readOnly=false}) {
   const [lists, setLists] = useState([])
   const [name, setName] = useState("")
+  const location = useLocation()
+  const sort = new URLSearchParams(location.search).get("sort")
+
 
   useEffect(() => {
     fetchLists()
   }, [])
 
   const fetchLists = async () => {
-    const res = await api.get("/booklists")
+    const res = await api.get("/booklist")
     setLists(res.data)
   }
 
   const createList = async () => {
-    await api.post("/booklists", { name })
+    await api.post("/booklist", { name })
     setName("")
     fetchLists()
   }
@@ -42,7 +46,7 @@ function Booklists({readOnly=false}) {
         {lists.map((list) => (
           <Link
             key={list._id}
-            to={`/booklists/${list._id}`}
+            to={`/booklist/${list._id}`}
             className="p-4 border rounded hover:shadow"
           >
             {list.name}
@@ -53,4 +57,4 @@ function Booklists({readOnly=false}) {
   )
 }
 
-export default Booklists
+export default Booklist
