@@ -2,7 +2,7 @@ import express from "express"
 import protect from "../middleware/authMiddleware.js"
 import {
   createBooklist,
-  getBooklists,
+  getBooklist,
   deleteBooklist,
   addBook,
   deleteBook,
@@ -10,7 +10,7 @@ import {
 } from "../controllers/booklistController.js"
 const router = express.Router()
 router.post("/", protect, createBooklist)
-router.get("/", protect, getBooklists)
+router.get("/", protect, getBooklist)
 router.delete("/:id", protect, deleteBooklist)
 router.put("/:id", protect, updateBooklist)
 router.post("/:id/books", protect, addBook)
