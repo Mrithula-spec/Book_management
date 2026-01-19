@@ -2,6 +2,7 @@ import express from "express"
 import dotenv from "dotenv"
 import cors from "cors"
 import path from "path"
+import bookRoutes from "./routes/bookRoutes.js"
 import { fileURLToPath } from "url";
 import connectDB from "./config/db.js"
 import authRoutes from "./routes/authRoutes.js"
@@ -20,7 +21,8 @@ app.use(express.json())
 app.use("/image", express.static(path.join(__dirname, "public/image")))
 
 app.use("/api/auth", authRoutes)
-app.use("/api/booklists", booklistRoutes)
+app.use("/api/books", bookRoutes)
+app.use("/api/booklist", booklistRoutes)
 
 app.use(errorHandler)
 
