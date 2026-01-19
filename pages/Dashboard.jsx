@@ -1,8 +1,38 @@
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import api from "../api/axios"
+
 function Dashboard() {
+  const navigate = useNavigate()
+
+  const [totalBooklist, setTotalBooklist] = useState(0)
+  const [totalBooks, setTotalBooks] = useState(0)
+  const [recentCount, setRecentCount] = useState(0)
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        // TOTAL BOOKLISTS
+        const booklistRes = await api.get("/booklist")
+        setTotalBooklist(Array.isArray(booklistRes.data) ? booklistRes.data.length : 0)
+
+        // TOTAL BOOKS
+        const booksRes = await api.get("/books")
+        setTotalBooks(Array.isArray(booksRes.data) ? booksRes.data.length : 0)
+
+        // RECENT BOOKLISTS (same endpoint, filtered later if needed)
+        setRecentCount(Array.isArray(booklistRes.data) ? booklistRes.data.length : 0)
+      } catch (error) {
+        console.error("Failed to load dashboard counts", error)
+      }
+    }
+
+    fetchCounts()
+  }, [])
+
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      {/* Header Section */}
+      {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">
           Welcome to Your Dashboard
@@ -14,30 +44,42 @@ function Dashboard() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <div className="bg-white rounded-xl shadow-md p-6 border">
+        {/* Total Booklists */}
+        <div
+          className="bg-white rounded-xl shadow-md p-6 border cursor-pointer"
+          onClick={() => navigate("/booklist/view")}
+        >
           <h3 className="text-sm font-medium text-gray-500">
             Total Booklists
           </h3>
           <p className="mt-2 text-3xl font-bold text-indigo-600">
-            —
+            {totalBooklist}
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-md p-6 border">
+        {/* Total Books */}
+        <div
+          className="bg-white rounded-xl shadow-md p-6 border cursor-pointer"
+          onClick={() => navigate("/books")}
+        >
           <h3 className="text-sm font-medium text-gray-500">
             Total Books
           </h3>
           <p className="mt-2 text-3xl font-bold text-green-600">
-            —
+            {totalBooks}
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-md p-6 border">
+        {/* Recently Updated */}
+        <div
+          className="bg-white rounded-xl shadow-md p-6 border cursor-pointer"
+          onClick={() => navigate("/booklist/view")}
+        >
           <h3 className="text-sm font-medium text-gray-500">
             Recently Updated
           </h3>
           <p className="mt-2 text-gray-700">
-            View your latest booklists
+            {recentCount}
           </p>
         </div>
       </div>
@@ -49,23 +91,17 @@ function Dashboard() {
         </h2>
 
         <div className="flex flex-col md:flex-row gap-4">
-          <a
-            href="/booklists"
-            className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition"
-          >
-            <Link to="/booklists/view">View Booklists</Link>
-          </a>
 
-          <a
-            href="/booklists"
+          <button
+            onClick={() => navigate("/booklist/create")}
             className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gray-100 text-gray-800 font-medium hover:bg-gray-200 transition"
           >
-          <Link to="/booklists/create">Create New Booklist</Link>
-          </a>
+            Create New Booklist
+          </button>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default Dashboard;
+export default Dashboard
