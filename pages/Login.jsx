@@ -13,7 +13,8 @@ function Login() {
     e.preventDefault()
 
     try {
-      const res = await api.post("/auth/login", { email, password })
+      const res = await api.post("auth/login", { email, password })
+      localStorage.setItem("token", res.data.token)
       login(res.data)
       navigate("/home")
     } catch {
