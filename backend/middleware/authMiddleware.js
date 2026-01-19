@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken"
+import User from "../models/User.js" // if you want to attach user object
 
-const protect = (req, res, next) => {
+const protect = async (req, res, next) => {
   let token
 
   if (
@@ -10,10 +11,18 @@ const protect = (req, res, next) => {
     try {
       token = req.headers.authorization.split(" ")[1]
       const decoded = jwt.verify(token, process.env.JWT_SECRET)
-      req.user = decoded.id
+
+      // Attach full user object (optional, but common)
+      const user = await User.findById(decoded.id).select("-password")
+      if (!user) {
+        return res.status(401).json({ message: "User not found" })
+      }
+
+      req.user = user
       next()
-    } catch {
-      res.status(401).json({ message: "Not authorized" })
+    } catch (error) {
+      console.error("JWT verification failed:", error.message)
+      res.status(401).json({ message: "Not authorized, token failed" })
     }
   } else {
     res.status(401).json({ message: "No token provided" })
