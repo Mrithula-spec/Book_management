@@ -23,7 +23,6 @@ function Navbar() {
         {user ? (
           <>
             <Link to="/dashboard">Dashboard</Link>
-            <Link to="/booklists">Booklists</Link>
             <button
               onClick={logout}
               className="bg-red-500 px-3 py-1 rounded"
