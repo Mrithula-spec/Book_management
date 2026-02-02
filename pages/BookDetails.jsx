@@ -27,10 +27,10 @@ function BookDetails() {
 
   return (
     <div className="p-8">
-      <img src={book.thumbnail} alt={book.bookName} />
+      <img src={`http://localhost:5000${book.thumbnail}`} alt={book.bookName} />
       <h1>{book.bookName}</h1>
       <p><strong>Author:</strong> {book.author}</p>
-      <p><strong>Genre:</strong> {book.genre}</p>
+      <p><strong>Genre:</strong> {book.booklist?.name}</p>
       <p><strong>Pages:</strong> {book.totalPages}</p>
       <p>{book.synopsis}</p>
     </div>
