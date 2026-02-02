@@ -18,9 +18,7 @@ const Books = () => {
   const [thumbnail, setThumbnail] = useState("");
   const [synopsis, setSynopsis] = useState("");
 
-  /* ----------------------------------------
-     FETCH BOOKLISTS
-  ---------------------------------------- */
+  
   useEffect(() => {
     const fetchBooklists = async () => {
       try {
@@ -36,9 +34,7 @@ const Books = () => {
     fetchBooklists();
   }, [user.token]);
 
-  /* ----------------------------------------
-     FETCH BOOKS FOR SELECTED BOOKLIST
-  ---------------------------------------- */
+
   useEffect(() => {
     if (!selectedBooklist) return;
 
@@ -59,9 +55,7 @@ const Books = () => {
     fetchBooks();
   }, [selectedBooklist, user.token]);
 
-  /* ----------------------------------------
-     ADD BOOK (NO GENRE HERE)
-  ---------------------------------------- */
+  
   const addBook = async () => {
     if (!selectedBooklist) return alert("Select a booklist first");
 
@@ -104,9 +98,7 @@ const Books = () => {
     <div className="books-page">
       <h2>My Books</h2>
 
-      {/* -------------------------------
-          SELECT BOOKLIST
-      -------------------------------- */}
+      {}
       <label>Select Booklist</label>
       <select
         value={selectedBooklist}
@@ -183,3 +175,4 @@ const Books = () => {
 };
 
 export default Books;
+
