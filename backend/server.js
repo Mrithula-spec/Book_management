@@ -19,7 +19,7 @@ const __dirname = path.dirname(__filename);
 app.use(cors())
 app.use(express.json())
 app.use("/image", express.static(path.join(__dirname, "public/image")))
-
+app.use("/uploads", express.static(path.join(__dirname, "uploads")))
 app.use("/api/auth", authRoutes)
 app.use("/api/books", bookRoutes)
 app.use("/api/booklist", booklistRoutes)
