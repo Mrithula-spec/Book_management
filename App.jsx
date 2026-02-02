@@ -9,6 +9,7 @@ import Books from "./pages/Books"
 import BookDetails from "./pages/BookDetails"
 import Navbar from "./components/Navbar"
 import ProtectedRoute from "./components/ProtectedRoute.jsx"
+import Layout from "./components/Layout"
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Navbar />
 
       <Routes>
+         <Route element={<Layout />}></Route>
         {/* DEFAULT → LOGIN */}
         <Route path="/" element={<Navigate to="/login" />} />
 
@@ -67,6 +69,17 @@ function App() {
     </ProtectedRoute>
   }
 />
+<Route path="/booklist/:id" element={<ProtectedRoute><Books /></ProtectedRoute>} />
+<Route
+  path="/booklist/view/:id"
+  element={
+    <ProtectedRoute>
+      <Books readOnly={true} />
+    </ProtectedRoute>
+  }
+/>
+
+
 
 
         <Route
