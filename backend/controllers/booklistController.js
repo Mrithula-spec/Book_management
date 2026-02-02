@@ -17,6 +17,24 @@ export const createBooklist = async (req, res) => {
 
   res.status(201).json(booklist)
 }
+export const getBooksByBooklist = async (req, res) => {
+  try {
+    const books = await Book.find({
+      booklist: req.params.id,
+      user: req.user._id,
+    }).populate("booklist", "name")
+
+    const formatted = books.map(book => ({
+      ...book.toObject(),
+      genre: book.booklist.name
+    }))
+
+    res.json(formatted)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 
 export const getBooklist = async (req, res) => {
    console.log("REQ.USER =", req.user, typeof req.user)
@@ -42,35 +60,80 @@ export const updateBooklist = async (req, res) => {
     res.status(500).json({ message: error.message })
   }
 }
-
-
 export const deleteBooklist = async (req, res) => {
-  await Booklist.findByIdAndDelete(req.params.id)
-  res.json({ message: "Booklist deleted" })
-}
-export const addBook = async (req, res) => {
-  const { bookName, author, genre, totalPages, thumbnail, synopsis } = req.body
+  const booklistId = req.params.id
+  const userId = req.user._id
 
-  if (!bookName || !author || !genre || !totalPages) {
+  // 1️⃣ Verify booklist belongs to user
+  const booklist = await Booklist.findOne({
+    _id: booklistId,
+    user: userId,
+  })
+
+  if (!booklist) {
+    return res.status(404).json({ message: "Booklist not found" })
+  }
+
+  // 2️⃣ Delete all books under this booklist (USER-SCOPED)
+  await Book.deleteMany({
+    booklist: booklistId})
+
+  // 3️⃣ Delete the booklist itself
+  await Booklist.deleteOne({
+    _id: booklistId,
+    user: userId,
+  })
+
+  res.json({ message: "Booklist and related books deleted" })
+}
+
+
+export const addBook = async (req, res) => {
+  const { bookName, author, totalPages, thumbnail, synopsis } = req.body
+
+  if (!bookName || !author || !totalPages) {
     return res.status(400).json({ message: "Missing required fields" })
   }
+   const booklist = await Booklist.findOne({
+    _id: req.params.id,
+    user: req.user._id
+  })
+
+  if (!booklist) {
+    return res.status(404).json({ message: "Booklist not found" })
+  }
+
 
   const book = await Book.create({
     bookName,
     author,
-    genre,
     totalPages,
     thumbnail,
     synopsis,
-    booklist: req.params.id  // link to Booklist
+    booklist: req.params.id , // link to Booklist
+    user: req.user._id
   })
 
   res.status(201).json(book)
 }
 
 export const deleteBook = async (req, res) => {
-  const deleted = await Book.findByIdAndDelete(req.params.bookId)
-  if (!deleted) return res.status(404).json({ message: "Book not found" })
-  res.json({ message: "Book deleted" })
+  const { bookId } = req.params
+  const userId = req.user._id
+
+  const book = await Book.findOneAndDelete({
+    _id: bookId,
+    user: userId,
+  })
+
+  if (!book) {
+    return res.status(404).json({ message: "Book not found" })
+  }
+   await Booklist.updateOne(
+    { _id: book.booklist },
+    { $pull: { books: bookId } }
+  )
+
+  res.json({ message: "Book deleted successfully" })
 }
 
