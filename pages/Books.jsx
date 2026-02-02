@@ -1,116 +1,185 @@
-import { useParams } from "react-router-dom"
-import { useEffect, useState } from "react"
-import api from "../api/axios"
+import { useEffect, useState } from "react";
+import api from "../api/axios"; // adjust path if needed
+import { useAuth } from "../context/AuthContext";
+import { useParams } from "react-router-dom";
 
-function Books() {
-  const { id } = useParams()
-  const [books, setBooks] = useState([])
+const Books = () => {
+  const { user } = useAuth();
+  const { id: booklistId } = useParams();
 
-  const [bookName, setBookName] = useState("")
-  const [author, setAuthor] = useState("")
-  const [genre, setGenre] = useState("Fiction")
-  const [totalPages, setTotalPages] = useState("")
-  const [thumbnail, setThumbnail] = useState("")
-  const [synopsis, setSynopsis] = useState("")
+  const [booklists, setBooklists] = useState([]);
+  const [selectedBooklist, setSelectedBooklist] = useState(booklistId || "");
 
+  const [books, setBooks] = useState([]);
+
+  const [bookName, setBookName] = useState("");
+  const [author, setAuthor] = useState("");
+  const [totalPages, setTotalPages] = useState("");
+  const [thumbnail, setThumbnail] = useState("");
+  const [synopsis, setSynopsis] = useState("");
+
+  /* ----------------------------------------
+     FETCH BOOKLISTS
+  ---------------------------------------- */
   useEffect(() => {
-    fetchBooks()
-  }, [])
+    const fetchBooklists = async () => {
+      try {
+        const res = await api.get("/booklist", {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
+        setBooklists(res.data);
+      } catch (err) {
+        console.error("Failed to fetch booklists", err);
+      }
+    };
 
-  const fetchBooks = async () => {
-    const res = await api.get(`/booklist/${id}`)
-    setBooks(res.data.books)
-  }
+    fetchBooklists();
+  }, [user.token]);
 
+  /* ----------------------------------------
+     FETCH BOOKS FOR SELECTED BOOKLIST
+  ---------------------------------------- */
+  useEffect(() => {
+    if (!selectedBooklist) return;
+
+    const fetchBooks = async () => {
+      try {
+        const res = await api.get(
+          `/booklist/${selectedBooklist}/books`,
+          {
+            headers: { Authorization: `Bearer ${user.token}` },
+          }
+        );
+        setBooks(res.data);
+      } catch (err) {
+        console.error("Failed to fetch books", err);
+      }
+    };
+
+    fetchBooks();
+  }, [selectedBooklist, user.token]);
+
+  /* ----------------------------------------
+     ADD BOOK (NO GENRE HERE)
+  ---------------------------------------- */
   const addBook = async () => {
-    await api.post(`/booklist/${id}/books`, {
-      bookName,
-      author,
-      genre,
-      totalPages: Number(totalPages),
-      thumbnail,
-      synopsis
-    })
+    if (!selectedBooklist) return alert("Select a booklist first");
 
-    setBookName("")
-    setAuthor("")
-    setGenre("Fiction")
-    setTotalPages("")
-    setThumbnail("")
-    setSynopsis("")
+    try {
+      await api.post(
+        `/booklist/${selectedBooklist}/books`,
+        {
+          bookName,
+          author,
+          totalPages: Number(totalPages),
+          thumbnail,
+          synopsis,
+        },
+        {
+          headers: { Authorization: `Bearer ${user.token}` },
+        }
+      );
 
-    fetchBooks()
-  }
+      // reset fields
+      setBookName("");
+      setAuthor("");
+      setTotalPages("");
+      setThumbnail("");
+      setSynopsis("");
+
+      // reload books
+      const res = await api.get(
+        `/booklist/${selectedBooklist}/books`,
+        {
+          headers: { Authorization: `Bearer ${user.token}` },
+        }
+      );
+      setBooks(res.data);
+    } catch (err) {
+      console.error("Failed to add book", err);
+    }
+  };
 
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold mb-4">My Books</h2>
+    <div className="books-page">
+      <h2>My Books</h2>
 
-      {/* Add Book Form */}
-      <div className="grid grid-cols-2 gap-2 mb-6">
+      {/* -------------------------------
+          SELECT BOOKLIST
+      -------------------------------- */}
+      <label>Select Booklist</label>
+      <select
+        value={selectedBooklist}
+        onChange={(e) => setSelectedBooklist(e.target.value)}
+      >
+        <option value="">-- Select --</option>
+        {booklists.map((bl) => (
+          <option key={bl._id} value={bl._id}>
+            {bl.name}
+          </option>
+        ))}
+      </select>
+
+      {/* -------------------------------
+          ADD BOOK FORM
+      -------------------------------- */}
+      <div className="add-book-form">
         <input
+          type="text"
           placeholder="Book Name"
           value={bookName}
           onChange={(e) => setBookName(e.target.value)}
-          className="border p-2"
         />
+
         <input
+          type="text"
           placeholder="Author"
           value={author}
           onChange={(e) => setAuthor(e.target.value)}
-          className="border p-2"
         />
-        <select
-          value={genre}
-          onChange={(e) => setGenre(e.target.value)}
-          className="border p-2"
-        >
-          <option>Fiction</option>
-          <option>Non-Fiction</option>
-          <option>Self-Help</option>
-          <option>Technology</option>
-          <option>Biography</option>
-          <option>Fantasy</option>
-        </select>
+
         <input
           type="number"
           placeholder="Total Pages"
           value={totalPages}
           onChange={(e) => setTotalPages(e.target.value)}
-          className="border p-2"
         />
+
         <input
+          type="text"
           placeholder="Thumbnail URL"
           value={thumbnail}
           onChange={(e) => setThumbnail(e.target.value)}
-          className="border p-2 col-span-2"
         />
+
         <textarea
           placeholder="Synopsis"
           value={synopsis}
           onChange={(e) => setSynopsis(e.target.value)}
-          className="border p-2 col-span-2"
         />
-       
+
+        <button onClick={addBook}>Add Book</button>
       </div>
 
-      {/* Book List */}
-      <div className="space-y-4">
+      {/* -------------------------------
+          BOOK LIST DISPLAY
+      -------------------------------- */}
+      <div className="books-list">
         {books.map((book) => (
-          <div key={book._id} className="border p-4 rounded">
-            <h3 className="font-bold">{book.bookName}</h3>
+          <div key={book._id} className="book-card">
+            <h3>{book.bookName}</h3>
             <p>Author: {book.author}</p>
-            <p>Genre: {book.genre}</p>
+            <p>Booklist: {book.booklist?.name}</p>
             <p>Total Pages: {book.totalPages}</p>
+
             {book.thumbnail && (
-              <img src={book.thumbnail} alt={book.bookName} className="w-32 mt-2" />
+              <img src={book.thumbnail} alt={book.bookName} />
             )}
-            <p className="mt-2 text-sm">{book.synopsis}</p>
           </div>
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Books
+export default Books;
