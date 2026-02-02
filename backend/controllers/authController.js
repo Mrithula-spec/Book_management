@@ -3,12 +3,17 @@ import bcrypt from "bcryptjs"
 import generateToken from "../utils/generateToken.js"
 import { MESSAGES } from "../constants/messages.js"
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const registerUser = async (req, res) => {
   const { name, email, password } = req.body
 
   if (!name || !email || !password) {
     res.status(400)
     throw new Error(MESSAGES.INVALID_INPUT)
+  }
+  if (!emailRegex.test(email)) {
+    res.status(400)
+    throw new Error("Invalid email format. Use example@gmail.com")
   }
 
   const userExists = await User.findOne({ email })
@@ -36,6 +41,10 @@ export const registerUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   const { email, password } = req.body
+   if (!emailRegex.test(email)) {
+    res.status(400)
+    throw new Error("Invalid email format")
+  }
 
   const user = await User.findOne({ email })
   if (user && (await bcrypt.compare(password, user.password))) {
