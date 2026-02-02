@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react"
 import { Link,useNavigate } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { AuthContext } from "../context/AuthContext"
 import api from "../api/axios"
 function Home() {
@@ -7,12 +8,21 @@ function Home() {
   const [selectedCategory, setSelectedCategory] = useState("All")
   const { user } = useContext(AuthContext)
   const [books, setBooks] = useState([])
+  const location = useLocation()
+    const deleteBook = async (bookId) => {
+    try {
+      await api.delete(`/books/${bookId}`, { 
+        headers: { Authorization: `Bearer ${user.token}` } 
+      });
+      setBooks((prev) => prev.filter((b) => b._id !== bookId));
+    } catch (err) {
+      console.error("Failed to delete book", err);
+    }
+  };
+
 
   useEffect(() => {
     if (!user) return;
-    console.log("USER FROM CONTEXT:", user)
-    console.log("TOKEN FROM CONTEXT:", user.token)
-
 
     const fetchBooks = async () => {
       try {
@@ -31,13 +41,21 @@ function Home() {
   selectedCategory === "All"
     ? books
     : books.filter(
-        (book) => book.genre=== selectedCategory
+        (book) =>  book.booklist && book.booklist?.name=== selectedCategory
         
       )
       const categories = [
   "All",
-  ...new Set(books.map((book) => book.genre)),
+  ...Array.from(
+    new Set(
+    books
+     .filter(book => book.booklist && book.booklist.name)
+        .map(book => book.booklist.name)
+    )
+  ),
 ]
+
+   
   return (
     <div className="bg-gray-50 text-gray-800">
       {/* HERO SECTION */}
@@ -136,12 +154,6 @@ categories.map((cat) => (
             <p className="text-gray-700 mb-6">
               Sign up to create your own booklists and track all your favorite reads in one place.
             </p>
-            <Link
-              to="/register"
-              className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition"
-            >
-              Get Started
-            </Link>
           </div>
           <div className="md:w-1/2 text-center">
             <div className="h-64 w-full bg-white rounded-3xl shadow-lg flex items-center justify-center">
