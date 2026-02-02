@@ -24,6 +24,16 @@ function Booklist({readOnly=false}) {
     setName("")
     fetchLists()
   }
+  const handleDeleteBooklist = async (id) => {
+  try {
+    await api.delete(`/booklist/${id}`)
+    setLists((prev) => prev.filter((list) => list._id !== id))
+   
+  } catch (error) {
+    console.error("Delete failed:", error.response?.data || error.message)
+  }
+}
+
 
   return (
     <div className="p-6">
@@ -41,18 +51,41 @@ function Booklist({readOnly=false}) {
           Add
         </button>
       </div>)}
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {lists.map((list) => (
-          <Link
-            key={list._id}
-            to={`/booklist/${list._id}`}
-            className="p-4 border rounded hover:shadow"
-          >
-            {list.name}
-          </Link>
-        ))}
-      </div>
+  {lists.map((list) => (
+    <div
+      key={list._id}
+      className="flex items-center justify-between p-4 border rounded hover:shadow"
+    >
+    {readOnly ? (
+  <span className="font-medium text-gray-700 ">
+    {list.name}
+  </span>
+) : (
+  <Link
+    to={`/booklist/${list._id}`}
+    className="font-medium text-indigo-600 hover:underline"
+  >
+    {list.name}
+  </Link>
+)}
+
+
+
+      {!readOnly && (
+        <button
+          onClick={() => handleDeleteBooklist(list._id,list.name)}
+          className="text-red-600 font-bold text-lg"
+        >
+          ×
+        </button>
+      )}
+    </div>
+  ))}
+</div>
+
+
+
     </div>
   )
 }
