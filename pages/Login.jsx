@@ -1,5 +1,6 @@
 import { useState, useContext } from "react"
 import api from "../api/axios"
+import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext"
 import { useNavigate } from "react-router-dom"
 
@@ -8,9 +9,16 @@ function Login() {
   const [password, setPassword] = useState("")
   const { login } = useContext(AuthContext)
   const navigate = useNavigate()
+  const isValidEmail = (email) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+     if (!isValidEmail(email)) {
+    alert("Please enter a valid email (example@gmail.com)")
+    return
+  }
 
     try {
       const res = await api.post("auth/login", { email, password })
@@ -34,6 +42,7 @@ function Login() {
           placeholder="Email"
           className="w-full mb-4 p-2 border"
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
 
         <input
@@ -46,6 +55,12 @@ function Login() {
         <button className="w-full bg-blue-600 text-white p-2 rounded">
           Login
         </button>
+        <p className="text-center mt-4 text-sm">
+  Don’t have an account?{" "}
+  <Link to="/register" className="text-blue-600 underline">
+    Register
+  </Link>
+</p>
       </form>
     </div>
   )
